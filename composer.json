@@ -14,12 +14,12 @@
     ],
     "require": {
         "php": ">=5.5",
-        "dsda/dbconnector": ">=1.0.0"
+		"dsda/dbconnector": ">=1.0.0"
     },
     "autoload": {
         "files": ["src/auth.php"],
         "psr-4": {
-            "dsda\\auth\\": "src/"
+            "auth\\": "src/"
         }
     }
 }
