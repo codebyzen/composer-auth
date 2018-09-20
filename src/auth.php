@@ -1,6 +1,6 @@
 <?php
 
-namespace auth;
+namespace dsda\auth;
 
 class auth {
 
@@ -8,8 +8,8 @@ class auth {
 
 	function __construct($is_ajax=false){
 
-		$this->config = new \dsda\config();
-		$this->db = new \dsda\dbconnector();
+		$this->config = new \dsda\config\config();
+		$this->db = new \dsda\dbconnector\dbconnector();
 
 		if ($is_ajax==true) {
 			if ($this->getCookie()) {
