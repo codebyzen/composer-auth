@@ -40,7 +40,7 @@ class auth {
 				$this->logout();
 			}
 			$query = "UPDATE `users` SET `last_activity` = ".time()." WHERE `id` = ".$this->auth->id.";";
-			$db->query($query);
+			$this->db->query($query);
 		}
 	}
 
@@ -51,7 +51,7 @@ class auth {
 	function login(){
 		$cookievalue = md5( $this->auth->login . $this->auth->password . $this->config->get('cookiename') . $this->config->get('salt') );
 		setcookie($this->config->get('cookiename'),$cookievalue, time()+360*60*24, '/', false ,false, true); // one day
-		$query = "UPDATE `users` SET `last_activity` = ".time().", `uid` = '".$cookievalue."' WHERE `id` = ".$this->auth->id.";";
+		$query = "UPDATE `users` SET `last_activity` = ".time().", `sid` = '".$cookievalue."' WHERE `id` = ".$this->auth->id.";";
 		$this->db->query($query);
 	}
 
@@ -60,7 +60,7 @@ class auth {
 	 */
 	function logout(){
 		if ($this->getCookie()) setcookie($this->config->get('cookiename'),$_COOKIE[$this->config->get('cookiename')], time()-360, '/', false ,false, true);
-		echo "<script type=\"text/javascript\">parent.location='admin.php';</script>";
+		echo "<script type=\"text/javascript\">parent.location='".$this->config->get('url')."';</script>";
 		exit;
 	}
 
@@ -104,9 +104,9 @@ class auth {
 	 */
 	function checkCookie(){
 		$out = false;
-		$uid = $this->getCookie();
-		if ($uid) {
-			$is_auth = $this->db->query("SELECT * FROM `users` WHERE `uid` = '".$uid."';");
+		$sid = $this->getCookie();
+		if ($sid) {
+			$is_auth = $this->db->query("SELECT * FROM `users` WHERE `sid` = '".$sid."';");
 			if ($is_auth!==NULL && isset($is_auth[0])) {
 				$out = $is_auth[0];
 			}
@@ -143,11 +143,11 @@ class auth {
 	* @access private
 	*/
 	private function checkExistTable(){
-		$existAccounts = $this->db->query("SELECT * FROM `users`;");
-		if($existAccounts===NULL || !isset($existAccounts[0])) {
+		$existAccounts = $this->db->tableExist('users');
+		if($existAccounts===false) {
 			// create table for attachment management
-			$query[] = "CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, login VARCHAR (255) UNIQUE, password VARCHAR (255));";
-			$query[] = "INSERT INTO users VALUES (NULL, 'admin', '76d80224611fc919a5d54f0ff9fba446';"; // qwe
+			$query[] = "CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, login VARCHAR (255) NOT NULL, password VARCHAR (255) NOT NULL, email VARCHAR (255), last_login DATETIME, last_activity DATETIME, sid VARCHAR (255), udid VARCHAR (255));";
+			$query[] = "INSERT INTO users VALUES (NULL, 'admin', '76d80224611fc919a5d54f0ff9fba446', 'null@null.tld', NULL, NULL, NULL, NULL);"; // qwe
 			foreach($query as $req) $this->db->query($req);
 		}
 		return;
