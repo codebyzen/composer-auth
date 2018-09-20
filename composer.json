@@ -1,0 +1,25 @@
+{
+    "name": "dsda/auth",
+    "type": "library",
+    "description": "Auth is authenticate library for web projects",
+    "keywords": ["framework", "authenticate", "login", "web service"],
+    "homepage": "http://dsda.ru/",
+    "license": "CC-BY-4.0",
+    "authors": [
+        {
+            "name": "Eugene Che",
+            "email": "dsda@dsda.ru",
+            "homepage": "https://github.com/ugputu"
+        }
+    ],
+    "require": {
+        "php": ">=5.5",
+        "dsda/dbconnector": ">=1.0.0"
+    },
+    "autoload": {
+        "files": ["src/auth.php"],
+        "psr-4": {
+            "dsda\\auth\\": "src/"
+        }
+    }
+}
