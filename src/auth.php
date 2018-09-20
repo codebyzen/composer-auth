@@ -6,10 +6,10 @@ class auth {
 
 	var $auth = false;
 
-	function __construct($is_ajax=false){
+	function __construct($config, $is_ajax=false){
 
-		$this->config = new \dsda\config\config();
-		$this->db = new \dsda\dbconnector\dbconnector();
+		$this->config = $config;
+		$this->db = new \dsda\dbconnector\dbconnector($this->config);
 
 		if ($is_ajax==true) {
 			if ($this->getCookie()) {
