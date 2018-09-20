@@ -1,6 +1,6 @@
 <?php
 
-namespace dsda\auth;
+namespace auth;
 
 class auth {
 
