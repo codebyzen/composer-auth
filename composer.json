@@ -14,7 +14,7 @@
     ],
     "require": {
         "php": ">=5.5",
-		"dsda/dbconnector": ">=1.0.0"
+		"dsda/dbconnector": ">=1.0.1"
     },
     "autoload": {
         "files": ["src/auth.php"],
