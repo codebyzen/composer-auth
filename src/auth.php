@@ -4,19 +4,33 @@ namespace dsda\auth;
 
 class auth {
 
-	var $auth = false;
+	public	$auth	= false;
+	private	$db		= null;
+	private	$url	= null;
 
-	function __construct($config, $is_ajax=false){
-
-		$this->config = $config;
-		$this->db = new \dsda\dbconnector\dbconnector($this->config);
-
-		if ($is_ajax==true) {
+	
+	function __construct($config=false, $db=false) {
+		if ($config==false) throw new \Exception("No config...");
+		if ($db==false) throw new \Exception("No db...");
+		$this->db = $db;
+		$neededConfigurationKeys = array('url','themepath', 'cookiename', 'salt');
+		foreach ($neededConfigurationKeys as $key => $value) {
+			if ($config->get($value)!==false) {
+				$this->$value = $config->get($value);
+			} else {
+				throw new \Exception("Error! No ".$value." defined in config...");
+			}
+		}
+	}
+	
+	
+	
+	function check($isAjax=false){
+		if ($isAjax==true) {
 			if ($this->getCookie()) {
 				return true;
 			} else {
-				header('HTTP/1.1 501 Fuck off!');
-				exit();
+				return false;
 			}
 		}
 
@@ -27,7 +41,7 @@ class auth {
 		
 		// no session for users
 		if(!$this->getCookie()){
-			if(!isset($_POST['f_auth'])) {
+			if(!isset($_POST['auth'])) {
 				$this->authenticate();
 			} else {
 				$this->checkExistTable();
@@ -41,16 +55,15 @@ class auth {
 			}
 			$query = "UPDATE `users` SET `last_activity` = ".time()." WHERE `id` = ".$this->auth->id.";";
 			$this->db->query($query);
-		}
+		}		
 	}
-
-
+	
 	/**
 	 * set cookie
 	 */
 	function login(){
-		$cookievalue = md5( $this->auth->login . $this->auth->password . $this->config->get('cookiename') . $this->config->get('salt') );
-		setcookie($this->config->get('cookiename'),$cookievalue, time()+360*60*24, '/', false ,false, true); // one day
+		$cookievalue = md5( $this->auth->login . $this->auth->password . $this->cookiename . $this->salt );
+		setcookie($this->cookiename,$cookievalue, time()+360*60*24, '/', false ,false, true); // one day
 		$query = "UPDATE `users` SET `last_activity` = ".time().", `sid` = '".$cookievalue."' WHERE `id` = ".$this->auth->id.";";
 		$this->db->query($query);
 	}
@@ -59,8 +72,8 @@ class auth {
 	 * remove cookie function
 	 */
 	function logout(){
-		if ($this->getCookie()) setcookie($this->config->get('cookiename'),$_COOKIE[$this->config->get('cookiename')], time()-360, '/', false ,false, true);
-		echo "<script type=\"text/javascript\">parent.location='".$this->config->get('url')."';</script>";
+		if ($this->getCookie()) setcookie($this->cookiename,$_COOKIE[$this->cookiename], time()-360, '/', false ,false, true);
+		echo "<script type=\"text/javascript\">parent.location='".$this->url."';</script>";
 		exit;
 	}
 
@@ -68,8 +81,8 @@ class auth {
 	 * get and filter cookie or false if false
 	 */
 	function getCookie(){
-		if (!isset($_COOKIE[$this->config->get('cookiename')])) return false;
-		$cookie = filter_var($_COOKIE[$this->config->get('cookiename')], FILTER_VALIDATE_REGEXP,array("options"=>array("regexp"=>"/^([a-f0-9]+)$/i")));
+		if (!isset($_COOKIE[$this->cookiename])) return false;
+		$cookie = filter_var($_COOKIE[$this->cookiename], FILTER_VALIDATE_REGEXP,array("options"=>array("regexp"=>"/^([a-f0-9]+)$/i")));
 		if ($cookie!==false && $cookie!==NULL) {
 			return $cookie;
 		} else {
@@ -115,18 +128,18 @@ class auth {
 	}
 
 	/**
-	* Send HTTP authentification FORM
+	* Send HTTP authentication FORM
 	*
 	* @access public
 	*/
 	function authenticate(){
-		if (file_exists($this->config->get('themepath').'/'.'assets/favicon/favicon-96x96.png')) {
-			$logo = '<div><img src="'.$this->config->get('themeurl').'/'.'assets/favicon/favicon-96x96.png'.'"></div>';
+		if (file_exists($this->themepath.'/'.'../favicon/favicon-96x96.png')) {
+			$logo = '<div><img src="'.$this->themeurl.'/'.'../favicon/favicon-96x96.png'.'"></div>';
 		} else {
 			$logo = '';
 		}
-		if (file_exists($this->config->get('path').'/gear/admin/auth.form.php')) {
-			include($this->config->get('path').'/gear/admin/auth.form.php');
+		if (file_exists($this->themepath.'/form.auth.php')) {
+			include($this->themepath.'/form.auth.php');
 		} else {
 			echo '<form method="post">
 			<input name="f_auth" value="true" type="hidden">
