@@ -44,7 +44,6 @@ class auth {
 			if(!isset($_POST['auth'])) {
 				$this->authenticate();
 			} else {
-				$this->checkExistTable();
 				$this->auth = $this->getAuthParam();
 				$this->login();
 			}
@@ -82,6 +81,7 @@ class auth {
 	 */
 	function getCookie(){
 		if (!isset($_COOKIE[$this->cookiename])) return false;
+		$this->checkExistTable();
 		$cookie = filter_var($_COOKIE[$this->cookiename], FILTER_VALIDATE_REGEXP,array("options"=>array("regexp"=>"/^([a-f0-9]+)$/i")));
 		if ($cookie!==false && $cookie!==NULL) {
 			return $cookie;
