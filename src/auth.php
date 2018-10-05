@@ -27,8 +27,9 @@ class auth {
 	
 	function check($isAjax=false){
 		if ($isAjax==true) {
-			if ($this->getCookie()) {
-				return true;
+			$is_ajax_request_authed = $this->checkCookie();
+			if ($is_ajax_request_authed!==false) {
+				return $is_ajax_request_authed;
 			} else {
 				return false;
 			}
@@ -42,7 +43,7 @@ class auth {
 		// no session for users
 		if(!$this->getCookie()){
 			if(!isset($_POST['auth'])) {
-				$this->authenticate();
+				return false;
 			} else {
 				$this->auth = $this->getAuthParam();
 				$this->login();
@@ -127,29 +128,7 @@ class auth {
 		return $out;
 	}
 
-	/**
-	* Send HTTP authentication FORM
-	*
-	* @access public
-	*/
-	function authenticate(){
-		if (file_exists($this->themepath.'/'.'../favicon/favicon-96x96.png')) {
-			$logo = '<div><img src="'.$this->themeurl.'/'.'../favicon/favicon-96x96.png'.'"></div>';
-		} else {
-			$logo = '';
-		}
-		if (file_exists($this->themepath.'/form.auth.php')) {
-			include($this->themepath.'/form.auth.php');
-		} else {
-			echo '<form method="post">
-			<input name="f_auth" value="true" type="hidden">
-			<input name="login" type="text" value="" placeholder="login"><br>
-			<input name="password" type="password" value="" placeholder="password"><br>
-			<input type="submit"></form>';
-		}
-		exit();
-	}
-
+	
 	/**
 	* upgrade config database if not exist table 'users' and 'groupes'
 	*
