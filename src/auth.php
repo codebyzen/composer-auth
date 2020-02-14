@@ -7,13 +7,15 @@ class auth {
 	public	$auth	= false;
 	private	$db		= null;
 	private	$url	= null;
+	private	$config	= null;
 
 	
 	function __construct($config=false, $db=false) {
+		
 		if ($config==false) throw new \Exception("No config...");
 		if ($db==false) throw new \Exception("No db...");
 		$this->db = $db;
-		$neededConfigurationKeys = array('url','themepath', 'cookiename', 'salt');
+		$neededConfigurationKeys = array('url', 'cookiename', 'salt');
 		foreach ($neededConfigurationKeys as $key => $value) {
 			if ($config->get($value)!==false) {
 				$this->$value = $config->get($value);
@@ -53,8 +55,9 @@ class auth {
 			if (!$this->auth) {
 				$this->logout();
 			}
-			$query = "UPDATE `users` SET `last_activity` = ".time()." WHERE `id` = ".$this->auth->id.";";
+			$query = "UPDATE `users` SET `last_activity` = NOW() WHERE `id` = ".$this->auth->id.";";
 			$this->db->query($query);
+			return true;
 		}		
 	}
 	
@@ -64,7 +67,7 @@ class auth {
 	function login(){
 		$cookievalue = md5( $this->auth->login . $this->auth->password . $this->cookiename . $this->salt );
 		setcookie($this->cookiename,$cookievalue, time()+360*60*24, '/', false ,false, true); // one day
-		$query = "UPDATE `users` SET `last_activity` = ".time().", `sid` = '".$cookievalue."' WHERE `id` = ".$this->auth->id.";";
+		$query = "UPDATE `users` SET `last_activity` = NOW(), `sid` = '".$cookievalue."' WHERE `id` = ".$this->auth->id.";";
 		$this->db->query($query);
 	}
 
